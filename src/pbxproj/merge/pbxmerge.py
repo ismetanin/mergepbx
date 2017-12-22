@@ -341,7 +341,16 @@ class PBXVariantGroupMerger3(_SimpleDictMerger3):
     merge_children = create_auto_merge_set("children")
 
 class XCVersionGroupMerger3(_SimpleDictMerger3):
-    merge_files = create_auto_merge_set("children")
+    merge_children = create_auto_merge_set("children")
+    def merge_currentVersion(self, base, mine, theirs, result, diff3):
+        currentVersion = _get_3("currentVersion", base, mine, theirs)
+        if not currentVersion.base == currentVersion.mine or not currentVersion.base == currentVersion.theirs:
+            raise MergeException("can not merge projects with different currentVersion")
+        if not int(currentVersion.base) in self.SUPPORTED_OBJECT_VERSIONS:
+            raise MergeException("can not merge projects with currentVersion %s" % currentVersion.base)
+ 
+        result["currentVersion"] = currentVersion.base
+        return result
 
 Value3 = namedtuple("Value3", ("base", "mine", "theirs"))
 
